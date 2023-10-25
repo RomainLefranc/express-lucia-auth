@@ -19,8 +19,7 @@ export const registerUserSchema = object({
 
 export const verifyUserSchema = object({
   params: object({
-    id: string(),
-    verificationCode: string(),
+    verificationToken: string(),
   }),
 });
 
@@ -34,8 +33,7 @@ export const forgotPasswordSchema = object({
 
 export const resetPasswordSchema = object({
   params: object({
-    id: string(),
-    passwordResetCode: string(),
+    passwordResetToken: string(),
   }),
   body: object({
     password: string({

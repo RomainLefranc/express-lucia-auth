@@ -1,4 +1,5 @@
 import { Response, Request, NextFunction } from "express";
+import { LuciaError } from "lucia";
 import { Error } from "mongoose";
 
 const notFound = (req: Request, res: Response, next: NextFunction) => {
@@ -16,6 +17,9 @@ const errorHandler = (
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;
 
+  if (err instanceof LuciaError) {
+    message = err.message;
+  }
   // If Mongoose not found error, set to 404 and change message
   if (err instanceof Error.CastError && err.kind === "ObjectId") {
     statusCode = 404;

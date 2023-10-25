@@ -16,6 +16,18 @@ declare global {
       SMTP_SECURE: boolean;
     }
   }
+  /// <reference types="lucia" />
+  namespace Lucia {
+    type Auth = import("./src/config/lucia").Auth;
+    type DatabaseUserAttributes = {
+      email: string;
+      firstName: string;
+      lastName: string;
+      verified: boolean;
+      verificationToken: String;
+    };
+    type DatabaseSessionAttributes = {};
+  }
 }
 
 declare module "express-serve-static-core" {

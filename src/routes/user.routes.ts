@@ -33,7 +33,7 @@ router
   .put(isAuthenticated, updateProfile);
 
 router.get(
-  "/verify/:id/:verificationCode",
+  "/verify/:id/:verificationToken",
   validateResource(verifyUserSchema),
   verify
 );

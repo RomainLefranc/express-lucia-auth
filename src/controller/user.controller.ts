@@ -11,7 +11,9 @@ import {
 import log from "../utils/logger";
 import sendEmail from "../utils/mailer";
 import UserModel from "../model/user.model";
-import generateToken from "../utils/jwt";
+import { auth } from "../config/lucia";
+import passwordResetTokenModel from "../model/passwordResetToken.model";
+import { generateRandomString, isWithinExpiration } from "lucia/utils";
 
 export async function register(
   req: Request<{}, {}, RegisterUserBody>,
@@ -19,47 +21,51 @@ export async function register(
 ) {
   const body = req.body;
 
-  const userExists = await UserModel.findOne({ email: body.email });
+  const { email, firstName, lastName, password } = body;
 
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists");
-  }
-
-  const user = await UserModel.create(body);
+  const user = await auth.createUser({
+    key: {
+      providerId: "email",
+      providerUserId: email.toLowerCase(),
+      password,
+    },
+    attributes: {
+      email,
+      firstName,
+      lastName,
+      verificationToken: nanoid(),
+      verified: false,
+    },
+  });
 
   await sendEmail({
     to: user.email,
     from: "test@example.com",
     subject: "Verify your email",
-    text: `verification code: ${user.verificationCode}. Id: ${user._id}`,
+    text: `verification code: ${user.verificationToken}`,
   });
 
   return res.send("User successfully created");
 }
 
 export async function verify(req: Request<VerifyUserParams>, res: Response) {
-  const { id, verificationCode } = req.params;
+  const { verificationToken } = req.params;
 
-  const user = await UserModel.findById(id);
+  const user = await UserModel.findOne({ verificationToken });
 
   if (!user) {
-    throw new Error("Id ou code de verification invalide");
+    throw new Error("Code de verification invalide");
   }
 
   if (user.verified) {
     throw new Error("Utilisateur déjà vérifié");
   }
 
-  if (user.verificationCode === verificationCode) {
-    user.verified = true;
+  user.verified = true;
 
-    await user.save();
+  await user.save();
 
-    return res.send("Utilisateur vérifié");
-  }
-
-  throw new Error("Id ou code de verification invalide");
+  return res.send("Utilisateur vérifié");
 }
 
 export async function login(
@@ -69,7 +75,8 @@ export async function login(
   const message = "Invalid email or password";
   const { email, password } = req.body;
 
-  const user = await UserModel.findOne({ email });
+  const key = await auth.useKey("email", email.toLowerCase(), password);
+  const user = await UserModel.findById(key.userId);
 
   if (!user) {
     res.status(401);
@@ -81,18 +88,18 @@ export async function login(
     throw new Error("Please verify your email");
   }
 
-  const passwordMatch = await user.validatePassword(password);
+  const session = await auth.createSession({
+    userId: key.userId,
+    attributes: {},
+  });
 
-  if (!passwordMatch) {
-    res.status(401);
-    throw new Error(message);
-  }
+  const authRequest = auth.handleRequest(req, res);
 
-  generateToken(res, user._id.toString());
+  authRequest.setSession(session);
 
   return res.json({
-    firstname: user.firstName,
-    lastname: user.lastName,
+    firstName: user.firstName,
+    lastName: user.lastName,
     _id: user._id,
     email: user.email,
   });
@@ -110,7 +117,7 @@ export async function updateProfile(req: Request, res: Response) {
     user.lastName = req.body.lastName || user.firstName;
 
     if (req.body.password) {
-      user.password = req.body.password;
+      await auth.updateKeyPassword("email", user.email, req.body.password);
     }
 
     const updatedUser = await user.save();
@@ -147,17 +154,34 @@ export async function forgotPassword(
     throw new Error("Utilisateur non vérifié");
   }
 
-  const passwordResetCode = nanoid();
+  const passwordResetTokens = await passwordResetTokenModel.find({
+    user_id: user._id,
+  });
 
-  user.passwordResetCode = passwordResetCode;
+  const EXPIRES_IN = 1000 * 60 * 60 * 2;
 
-  await user.save();
+  if (passwordResetTokens.length > 0) {
+    const reusableStoredToken = passwordResetTokens.find((token) =>
+      isWithinExpiration(Number(token.expires) - EXPIRES_IN / 2)
+    );
+    if (reusableStoredToken) {
+      throw new Error("Un email a déjà été envoyé");
+    }
+  }
+
+  const passwordResetCode = generateRandomString(63);
+
+  await passwordResetTokenModel.create({
+    user_id: user._id,
+    expires: new Date().getTime() + EXPIRES_IN,
+    _id: passwordResetCode,
+  });
 
   await sendEmail({
     to: user.email,
     from: "test@example.com",
     subject: "Réinitialisez votre mot de passe",
-    text: `Code de réinitialisation de mot de passe: ${passwordResetCode}. Id ${user._id}`,
+    text: `Code de réinitialisation de mot de passe: ${passwordResetCode}`,
   });
 
   log.debug(`Email de réinitialisation de mot de passe envoyé à ${email}`);
@@ -169,35 +193,45 @@ export async function resetPassword(
   req: Request<ResetPasswordParams, {}, ResetPasswordBody>,
   res: Response
 ) {
-  const { id, passwordResetCode } = req.params;
-
+  const { passwordResetToken } = req.params;
   const { password } = req.body;
 
-  const user = await UserModel.findById(id);
+  const storedPasswordResetToken = await passwordResetTokenModel.findById(
+    passwordResetToken
+  );
+
+  if (!storedPasswordResetToken) {
+    res.status(401);
+    throw new Error("Code de réinitialisation invalide");
+  }
+
+  await passwordResetTokenModel.deleteOne({
+    _id: storedPasswordResetToken._id,
+  });
+
+  if (!isWithinExpiration(storedPasswordResetToken.expires)) {
+    throw new Error("Code de réinitialisation expiré");
+  }
+
+  const user = await UserModel.findById(storedPasswordResetToken._id);
 
   if (!user) {
-    res.status(401);
-    throw new Error("Id ou code de réinitialisation invalide");
+    throw new Error("Erreur");
   }
 
-  if (!user.passwordResetCode || user.passwordResetCode !== passwordResetCode) {
-    res.status(400);
-    throw new Error("Code de réinitialisation de mot de passe invalide");
-  }
-
-  user.passwordResetCode = null;
-
-  user.password = password;
-
-  await user.save();
+  await auth.updateKeyPassword("email", user.email, password);
 
   return res.send("Mot de passe de l'utilisateur mis à jour");
 }
 
-export function logout(req: Request, res: Response) {
-  res.cookie("jwt", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
+export async function logout(req: Request, res: Response) {
+  const authRequest = auth.handleRequest(req, res);
+  const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
+  if (!session) {
+    return res.sendStatus(401);
+  }
+  await auth.invalidateSession(session.sessionId);
+
+  authRequest.setSession(null);
   return res.status(200).json({ message: "Logged out successfully" });
 }
