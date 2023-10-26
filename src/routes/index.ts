@@ -1,10 +1,11 @@
 import express from "express";
-import user from "./user.routes";
+import user from "./user.route";
+import auth from "./auth.route";
 
 const router = express.Router();
 
-router.get("/healthcheck", (_, res) => res.sendStatus(200));
+router.use("/auth/provider", auth);
 
-router.use("/auth", user);
+router.use("/profile", user);
 
 export default router;

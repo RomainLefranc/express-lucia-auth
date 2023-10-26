@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../config/lucia";
+import { auth } from "../config";
 
 const isAuthenticated = async (
   req: Request,
@@ -10,8 +10,7 @@ const isAuthenticated = async (
   const session = await authRequest.validate();
 
   if (!session) {
-    res.status(401);
-    throw new Error("Not authorized, no token");
+    return res.status(401).send("Not authorized, no token");
   }
 
   req.user = session.user;

@@ -1,6 +1,5 @@
 import nodemailer, { SendMailOptions } from "nodemailer";
-import log from "./logger";
-import transporter from "../config/mailer";
+import { transporter, log } from "../config";
 
 // async function createTestCreds() {
 //   const creds = await nodemailer.createTestAccount();

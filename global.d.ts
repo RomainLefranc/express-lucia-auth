@@ -1,6 +1,5 @@
 import { ObjectId } from "mongoose";
-import { User } from "./src/model/user.model";
-
+import { User } from "lucia";
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -18,12 +17,12 @@ declare global {
   }
   /// <reference types="lucia" />
   namespace Lucia {
-    type Auth = import("./src/config/lucia").Auth;
+    type Auth = import("./src/config/lucia.config").Auth;
     type DatabaseUserAttributes = {
       email: string;
       firstName: string;
       lastName: string;
-      verified: boolean;
+      emailIsVerified: boolean;
       verificationToken: String;
     };
     type DatabaseSessionAttributes = {};
@@ -32,6 +31,6 @@ declare global {
 
 declare module "express-serve-static-core" {
   interface Request {
-    user: Omit<User & { _id: ObjectId }, "password">;
+    user: User;
   }
 }

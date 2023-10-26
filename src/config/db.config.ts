@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import log from "../utils/logger";
+import log from "./logger.config";
 
 export async function connectToDb() {
   try {

@@ -5,7 +5,7 @@ interface IUser extends UserDoc {
   email: string;
   firstName: string;
   lastName: string;
-  verified: boolean;
+  emailIsVerified: boolean;
   verificationToken: String;
 }
 
@@ -22,7 +22,7 @@ const userSchema = new Schema<IUser>(
     },
     firstName: String,
     lastName: String,
-    verified: Boolean,
+    emailIsVerified: Boolean,
     verificationToken: String,
   } as const,
   { _id: false }

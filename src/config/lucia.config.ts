@@ -5,7 +5,7 @@ import {
   userModel as User,
   sessionModel as Session,
   keyModel as Key,
-} from "../model/";
+} from "../model";
 
 export const auth = lucia({
   adapter: mongoose({
@@ -20,7 +20,7 @@ export const auth = lucia({
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
-      verified: data.verified,
+      emailIsVerified: data.emailIsVerified,
       verificationToken: data.verificationToken,
     };
   },

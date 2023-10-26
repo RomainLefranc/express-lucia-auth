@@ -1,10 +1,7 @@
-import dotenv from "dotenv";
-dotenv.config();
 import express from "express";
-import log from "./utils/logger";
+import { log, connectToDb } from "./config";
 import router from "./routes";
 import helmet from "helmet";
-import connectToDb from "./config/db";
 import rateLimiter from "./middleware/rateLimiter";
 import { errorHandler, notFound } from "./middleware/error";
 import swaggerJsdoc from "swagger-jsdoc";

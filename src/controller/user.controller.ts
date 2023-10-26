@@ -8,12 +8,12 @@ import {
   ResetPasswordParams,
   VerifyUserParams,
 } from "../validationSchema/user.schema";
-import log from "../utils/logger";
-import sendEmail from "../utils/mailer";
-import UserModel from "../model/user.model";
-import { auth } from "../config/lucia";
+import { log, auth } from "../config";
+import { sendEmail } from "../utils";
+import { userModel } from "../model";
 import passwordResetTokenModel from "../model/passwordResetToken.model";
 import { generateRandomString, isWithinExpiration } from "lucia/utils";
+import { LuciaError } from "lucia";
 
 export async function register(
   req: Request<{}, {}, RegisterUserBody>,
@@ -22,21 +22,34 @@ export async function register(
   const body = req.body;
 
   const { email, firstName, lastName, password } = body;
+  let user;
 
-  const user = await auth.createUser({
-    key: {
-      providerId: "email",
-      providerUserId: email.toLowerCase(),
-      password,
-    },
-    attributes: {
-      email,
-      firstName,
-      lastName,
-      verificationToken: nanoid(),
-      verified: false,
-    },
-  });
+  try {
+    user = await auth.createUser({
+      key: {
+        providerId: "email",
+        providerUserId: email.toLowerCase(),
+        password,
+      },
+      attributes: {
+        email,
+        firstName,
+        lastName,
+        verificationToken: nanoid(),
+        emailIsVerified: false,
+      },
+    });
+  } catch (error) {
+    if (
+      error instanceof LuciaError &&
+      error.message == "AUTH_DUPLICATE_KEY_ID"
+    ) {
+      return res.status(500).json({
+        message: "Ce compte existe déjà",
+      });
+    }
+    throw error;
+  }
 
   await sendEmail({
     to: user.email,
@@ -51,17 +64,17 @@ export async function register(
 export async function verify(req: Request<VerifyUserParams>, res: Response) {
   const { verificationToken } = req.params;
 
-  const user = await UserModel.findOne({ verificationToken });
+  const user = await userModel.findOne({ verificationToken });
 
   if (!user) {
     throw new Error("Code de verification invalide");
   }
 
-  if (user.verified) {
+  if (user.emailIsVerified) {
     throw new Error("Utilisateur déjà vérifié");
   }
 
-  user.verified = true;
+  user.emailIsVerified = true;
 
   await user.save();
 
@@ -74,23 +87,38 @@ export async function login(
 ) {
   const message = "Invalid email or password";
   const { email, password } = req.body;
+  let key;
 
-  const key = await auth.useKey("email", email.toLowerCase(), password);
-  const user = await UserModel.findById(key.userId);
+  try {
+    key = await auth.useKey("email", email.toLowerCase(), password);
+  } catch (error) {
+    if (
+      error instanceof LuciaError &&
+      (error.message === "AUTH_INVALID_KEY_ID" ||
+        error.message === "AUTH_INVALID_PASSWORD")
+    ) {
+      return res.status(500).json({
+        message,
+      });
+    }
+    throw error;
+  }
+
+  const user = await userModel.findById(key.userId);
 
   if (!user) {
     res.status(401);
     throw new Error(message);
   }
 
-  if (!user.verified) {
+  if (!user.emailIsVerified) {
     res.status(401);
     throw new Error("Please verify your email");
   }
 
   const session = await auth.createSession({
     userId: key.userId,
-    attributes: {},
+    attributes: { email: user.email, id: user._id },
   });
 
   const authRequest = auth.handleRequest(req, res);
@@ -110,7 +138,7 @@ export async function getProfile(req: Request, res: Response) {
 }
 
 export async function updateProfile(req: Request, res: Response) {
-  const user = await UserModel.findById(req.user._id);
+  const user = await userModel.findById(req.user.userId);
 
   if (user) {
     user.firstName = req.body.firstName || user.firstName;
@@ -143,25 +171,25 @@ export async function forgotPassword(
 
   const { email } = req.body;
 
-  const user = await UserModel.findOne({ email });
+  const user = await userModel.findOne({ email });
 
   if (!user) {
     log.debug(`Utilisateur avec l'email ${email} n'existe pas`);
     throw new Error(message);
   }
 
-  if (!user.verified) {
+  if (!user.emailIsVerified) {
     throw new Error("Utilisateur non vérifié");
   }
 
-  const passwordResetTokens = await passwordResetTokenModel.find({
+  const storedPasswordResetTokens = await passwordResetTokenModel.find({
     user_id: user._id,
   });
 
   const EXPIRES_IN = 1000 * 60 * 60 * 2;
 
-  if (passwordResetTokens.length > 0) {
-    const reusableStoredToken = passwordResetTokens.find((token) =>
+  if (storedPasswordResetTokens.length > 0) {
+    const reusableStoredToken = storedPasswordResetTokens.find((token) =>
       isWithinExpiration(Number(token.expires) - EXPIRES_IN / 2)
     );
     if (reusableStoredToken) {
@@ -169,19 +197,19 @@ export async function forgotPassword(
     }
   }
 
-  const passwordResetCode = generateRandomString(63);
+  const passwordResetToken = generateRandomString(63);
 
   await passwordResetTokenModel.create({
     user_id: user._id,
     expires: new Date().getTime() + EXPIRES_IN,
-    _id: passwordResetCode,
+    _id: passwordResetToken,
   });
 
   await sendEmail({
     to: user.email,
     from: "test@example.com",
     subject: "Réinitialisez votre mot de passe",
-    text: `Code de réinitialisation de mot de passe: ${passwordResetCode}`,
+    text: `Code de réinitialisation de mot de passe: ${passwordResetToken}`,
   });
 
   log.debug(`Email de réinitialisation de mot de passe envoyé à ${email}`);
@@ -205,7 +233,7 @@ export async function resetPassword(
     throw new Error("Code de réinitialisation invalide");
   }
 
-  await passwordResetTokenModel.deleteOne({
+  await passwordResetTokenModel.findByIdAndDelete({
     _id: storedPasswordResetToken._id,
   });
 
@@ -213,7 +241,7 @@ export async function resetPassword(
     throw new Error("Code de réinitialisation expiré");
   }
 
-  const user = await UserModel.findById(storedPasswordResetToken._id);
+  const user = await userModel.findById(storedPasswordResetToken.user_id);
 
   if (!user) {
     throw new Error("Erreur");
@@ -226,7 +254,7 @@ export async function resetPassword(
 
 export async function logout(req: Request, res: Response) {
   const authRequest = auth.handleRequest(req, res);
-  const session = await authRequest.validate(); // or `authRequest.validateBearerToken()`
+  const session = await authRequest.validate();
   if (!session) {
     return res.sendStatus(401);
   }

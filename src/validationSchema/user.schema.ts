@@ -40,14 +40,6 @@ export const resetPasswordSchema = object({
       required_error: "Mot de passe est requis",
       invalid_type_error: "Mot de passe doit être une chaine de caractères",
     }).min(6, "Mot de passe doit faire minimum 6 caractères"),
-    passwordConfirmation: string({
-      invalid_type_error:
-        "Mot de passe de confirmation doit être une chaine de caractères",
-      required_error: "Confirmation de mot de passe est requis",
-    }),
-  }).refine((data) => data.password === data.passwordConfirmation, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["passwordConfirmation"],
   }),
 });
 
