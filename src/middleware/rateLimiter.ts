@@ -1,7 +1,5 @@
 import { NextFunction, Response, Request } from "express";
-import rateLimiterMongo, {
-  rateLimiterConfig,
-} from "../config/rateLimiter.config";
+import { rateLimiterConfig } from "../config/rateLimiter.config";
 
 const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
   const ratelimiter = rateLimiterConfig();
@@ -12,8 +10,9 @@ const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
       next();
     })
     .catch((e) => {
-      console.log(e);
-      res.status(429).send("Too Many Requests");
+      return res.status(401).json({
+        message: "Too Many Requests",
+      });
     });
 };
 

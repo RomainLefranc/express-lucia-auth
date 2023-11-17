@@ -40,13 +40,12 @@ export async function register(
       },
     });
   } catch (error) {
+    res.status(500);
     if (
       error instanceof LuciaError &&
       error.message == "AUTH_DUPLICATE_KEY_ID"
     ) {
-      return res.status(500).json({
-        message: "Ce compte existe déjà",
-      });
+      throw new Error("Account already exist");
     }
     throw error;
   }
@@ -55,10 +54,12 @@ export async function register(
     to: user.email,
     from: "test@example.com",
     subject: "Verify your email",
-    text: `verification code: ${user.verificationToken}`,
+    text: `verification token: ${user.verificationToken}`,
   });
 
-  return res.send("User successfully created");
+  return res.status(201).json({
+    message: "User created",
+  });
 }
 
 export async function verify(req: Request<VerifyUserParams>, res: Response) {
@@ -67,18 +68,22 @@ export async function verify(req: Request<VerifyUserParams>, res: Response) {
   const user = await userModel.findOne({ verificationToken });
 
   if (!user) {
-    throw new Error("Code de verification invalide");
+    res.status(400);
+    throw new Error("Verification token invalid");
   }
 
   if (user.emailIsVerified) {
-    throw new Error("Utilisateur déjà vérifié");
+    res.status(400);
+    throw new Error("User already verified");
   }
 
   user.emailIsVerified = true;
 
   await user.save();
 
-  return res.send("Utilisateur vérifié");
+  return res.status(200).json({
+    message: "User verified",
+  });
 }
 
 export async function login(
@@ -92,14 +97,14 @@ export async function login(
   try {
     key = await auth.useKey("email", email.toLowerCase(), password);
   } catch (error) {
+    res.status(500);
+
     if (
       error instanceof LuciaError &&
       (error.message === "AUTH_INVALID_KEY_ID" ||
         error.message === "AUTH_INVALID_PASSWORD")
     ) {
-      return res.status(500).json({
-        message,
-      });
+      throw new Error(message);
     }
     throw error;
   }
@@ -129,12 +134,13 @@ export async function login(
     firstName: user.firstName,
     lastName: user.lastName,
     _id: user._id,
-    email: user.email,
   });
 }
 
 export async function getProfile(req: Request, res: Response) {
-  return res.send(req.user);
+  return res.status(200).json({
+    data: req.user,
+  });
 }
 
 export async function updateProfile(req: Request, res: Response) {
@@ -151,10 +157,8 @@ export async function updateProfile(req: Request, res: Response) {
     const updatedUser = await user.save();
 
     res.json({
-      _id: updatedUser._id,
       firstName: updatedUser.firstName,
       lastName: updatedUser.lastName,
-      email: updatedUser.email,
     });
   } else {
     res.status(404);
@@ -167,19 +171,20 @@ export async function forgotPassword(
   res: Response
 ) {
   const message =
-    "Si un utilisateur avec cet email est enregistré, vous allez recevoir un email de réinitialisation de mot de passe";
+    "If a user with this email is registered, you will receive a password recovery email";
 
   const { email } = req.body;
 
   const user = await userModel.findOne({ email });
 
   if (!user) {
-    log.debug(`Utilisateur avec l'email ${email} n'existe pas`);
+    res.status(200);
     throw new Error(message);
   }
 
   if (!user.emailIsVerified) {
-    throw new Error("Utilisateur non vérifié");
+    res.status(401);
+    throw new Error("User not verified");
   }
 
   const storedPasswordResetTokens = await passwordResetTokenModel.find({
@@ -212,9 +217,8 @@ export async function forgotPassword(
     text: `Code de réinitialisation de mot de passe: ${passwordResetToken}`,
   });
 
-  log.debug(`Email de réinitialisation de mot de passe envoyé à ${email}`);
-
-  return res.send(message);
+  res.status(200);
+  return res.json({ message });
 }
 
 export async function resetPassword(
@@ -229,8 +233,8 @@ export async function resetPassword(
   );
 
   if (!storedPasswordResetToken) {
-    res.status(401);
-    throw new Error("Code de réinitialisation invalide");
+    res.status(500);
+    throw new Error("Reset password token invalid");
   }
 
   await passwordResetTokenModel.findByIdAndDelete({
@@ -238,25 +242,29 @@ export async function resetPassword(
   });
 
   if (!isWithinExpiration(storedPasswordResetToken.expires)) {
-    throw new Error("Code de réinitialisation expiré");
+    res.status(500);
+    throw new Error("Reset password token expired");
   }
 
   const user = await userModel.findById(storedPasswordResetToken.user_id);
 
   if (!user) {
-    throw new Error("Erreur");
+    res.status(500);
+    throw new Error("Something went wrong");
   }
 
   await auth.updateKeyPassword("email", user.email, password);
 
-  return res.send("Mot de passe de l'utilisateur mis à jour");
+  res.status(200);
+  return res.json({ message: "Password updated" });
 }
 
 export async function logout(req: Request, res: Response) {
   const authRequest = auth.handleRequest(req, res);
   const session = await authRequest.validate();
   if (!session) {
-    return res.sendStatus(401);
+    res.status(401);
+    throw new Error("Not authenticated");
   }
   await auth.invalidateSession(session.sessionId);
 

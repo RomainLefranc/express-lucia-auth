@@ -10,7 +10,9 @@ const isAuthenticated = async (
   const session = await authRequest.validate();
 
   if (!session) {
-    return res.status(401).send("Not authorized, no token");
+    return res.status(401).json({
+      message: "Not authorized",
+    });
   }
 
   req.user = session.user;
