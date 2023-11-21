@@ -1,6 +1,6 @@
 import { object, string, TypeOf } from "zod";
 
-export const registerUserSchema = object({
+export const registerUserDto = object({
   body: object({
     firstName: string({
       required_error: "Prenom est requis",
@@ -17,13 +17,13 @@ export const registerUserSchema = object({
   }),
 });
 
-export const verifyUserSchema = object({
+export const verifyUserDto = object({
   params: object({
     verificationToken: string(),
   }),
 });
 
-export const forgotPasswordSchema = object({
+export const forgotPasswordDto = object({
   body: object({
     email: string({
       required_error: "Email est requis",
@@ -31,7 +31,7 @@ export const forgotPasswordSchema = object({
   }),
 });
 
-export const resetPasswordSchema = object({
+export const resetPasswordDto = object({
   params: object({
     passwordResetToken: string(),
   }),
@@ -43,7 +43,7 @@ export const resetPasswordSchema = object({
   }),
 });
 
-export const loginUserSchema = object({
+export const loginUserDto = object({
   body: object({
     email: string({
       required_error: "Email est requis",
@@ -56,14 +56,14 @@ export const loginUserSchema = object({
   }),
 });
 
-export type LoginUserBody = TypeOf<typeof loginUserSchema>["body"];
+export type LoginUserBody = TypeOf<typeof loginUserDto>["body"];
 
-export type RegisterUserBody = TypeOf<typeof registerUserSchema>["body"];
+export type RegisterUserBody = TypeOf<typeof registerUserDto>["body"];
 
-export type VerifyUserParams = TypeOf<typeof verifyUserSchema>["params"];
+export type VerifyUserParams = TypeOf<typeof verifyUserDto>["params"];
 
-export type ForgotPasswordBody = TypeOf<typeof forgotPasswordSchema>["body"];
+export type ForgotPasswordBody = TypeOf<typeof forgotPasswordDto>["body"];
 
-export type ResetPasswordBody = TypeOf<typeof resetPasswordSchema>["body"];
+export type ResetPasswordBody = TypeOf<typeof resetPasswordDto>["body"];
 
-export type ResetPasswordParams = TypeOf<typeof resetPasswordSchema>["params"];
+export type ResetPasswordParams = TypeOf<typeof resetPasswordDto>["params"];

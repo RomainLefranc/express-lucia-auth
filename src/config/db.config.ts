@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import log from "./logger.config";
+import { log } from "./logger.config";
 
 export async function connectToDb() {
   try {
@@ -10,5 +10,3 @@ export async function connectToDb() {
     process.exit(1);
   }
 }
-
-export default connectToDb;

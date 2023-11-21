@@ -1,42 +1,45 @@
 import express from "express";
 import * as userController from "../../controller/user.controller";
-import { isAuthenticated } from "../../middleware/isAuthenticated";
-import validateResource from "../../middleware/validateResource";
+import { ValidateResourceMiddleware } from "../../middleware/validateResource.middleware";
 import {
-  registerUserSchema,
-  forgotPasswordSchema,
-  resetPasswordSchema,
-  verifyUserSchema,
-  loginUserSchema,
-} from "../../validationSchema/user.schema";
+  registerUserDto,
+  forgotPasswordDto,
+  resetPasswordDto,
+  verifyUserDto,
+  loginUserDto,
+} from "../../dtos/user.dto";
 
 const router = express.Router();
 
 router.post(
   "/register",
-  validateResource(registerUserSchema),
+  ValidateResourceMiddleware(registerUserDto),
   userController.register
 );
 
-router.post("/login", validateResource(loginUserSchema), userController.login);
+router.post(
+  "/login",
+  ValidateResourceMiddleware(loginUserDto),
+  userController.login
+);
 
 router.post("/logout", userController.logout);
 
 router.get(
   "/verify/:verificationToken",
-  validateResource(verifyUserSchema),
+  ValidateResourceMiddleware(verifyUserDto),
   userController.verify
 );
 
 router.post(
   "/forgot-password",
-  validateResource(forgotPasswordSchema),
+  ValidateResourceMiddleware(forgotPasswordDto),
   userController.forgotPassword
 );
 
 router.post(
   "/reset-password/:passwordResetToken",
-  validateResource(resetPasswordSchema),
+  ValidateResourceMiddleware(resetPasswordDto),
   userController.resetPassword
 );
 

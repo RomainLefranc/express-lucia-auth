@@ -1,3 +1,3 @@
-import sendEmail from "./mailer.utils";
+import { sendEmail } from "./mailer.utils";
 
 export { sendEmail };

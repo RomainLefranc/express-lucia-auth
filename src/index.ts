@@ -2,10 +2,13 @@ import express from "express";
 import { log, connectToDb } from "@config/index";
 import router from "@routes/index";
 import helmet from "helmet";
-import { rateLimiter, errorHandler, notFound } from "@middleware/index";
+import {
+  RateLimitingMiddleware,
+  ErrorMiddleware,
+  NotFoundMiddleware,
+} from "@middleware/index.middleware";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-
 connectToDb();
 
 const app = express();
@@ -16,7 +19,7 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(rateLimiter);
+app.use(RateLimitingMiddleware);
 
 app.use("/api", router);
 
@@ -36,9 +39,9 @@ if (process.env.NODE_ENV === "development") {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
 }
 
-app.use(notFound);
+app.use(NotFoundMiddleware);
 
-app.use(errorHandler);
+app.use(ErrorMiddleware);
 
 const port = process.env.PORT || 8080;
 

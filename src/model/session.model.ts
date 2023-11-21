@@ -1,9 +1,7 @@
 import { SessionDoc } from "@lucia-auth/adapter-mongoose/dist/docs";
 import { Schema, model } from "mongoose";
 
-interface ISession extends SessionDoc {}
-
-const sessionSchema = new Schema<ISession>(
+const sessionSchema = new Schema<SessionDoc>(
   {
     _id: {
       type: String,

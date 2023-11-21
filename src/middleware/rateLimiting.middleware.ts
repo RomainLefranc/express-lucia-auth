@@ -1,7 +1,11 @@
 import { NextFunction, Response, Request } from "express";
 import { rateLimiterConfig } from "../config/rateLimiter.config";
 
-const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
+export const RateLimitingMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const ratelimiter = rateLimiterConfig();
 
   ratelimiter
@@ -15,5 +19,3 @@ const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
       });
     });
 };
-
-export default rateLimiter;

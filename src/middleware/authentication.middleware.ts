@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { auth } from "@config/index";
 
-const isAuthenticated = async (
+export const AuthenticationMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -19,5 +19,3 @@ const isAuthenticated = async (
 
   next();
 };
-
-export { isAuthenticated };

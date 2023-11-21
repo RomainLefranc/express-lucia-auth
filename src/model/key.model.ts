@@ -1,9 +1,7 @@
 import { KeyDoc } from "@lucia-auth/adapter-mongoose/dist/docs";
 import { Schema, model } from "mongoose";
 
-interface IKey extends KeyDoc {}
-
-const keySchema = new Schema<IKey>(
+const keySchema = new Schema<KeyDoc>(
   {
     _id: {
       type: String,

@@ -8,5 +8,3 @@ export function rateLimiterConfig() {
     duration: 1,
   });
 }
-
-export default rateLimiterConfig;
