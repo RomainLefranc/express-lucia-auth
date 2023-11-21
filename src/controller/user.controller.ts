@@ -6,14 +6,14 @@ import {
   RegisterUserBody,
   ResetPasswordBody,
   ResetPasswordParams,
+  UpdateUserBody,
   VerifyUserParams,
 } from "dtos/user.dto";
-import { log, auth } from "@config/index";
+import { auth } from "@config/index";
 import { sendEmail } from "@utils/index";
 import { userModel } from "@model/index";
 import passwordResetTokenModel from "@model/passwordResetToken.model";
 import { generateRandomString, isWithinExpiration } from "lucia/utils";
-import { LuciaError } from "lucia";
 import { HttpException } from "exceptions/HttpException";
 
 export async function register(
@@ -133,33 +133,32 @@ export async function getProfile(req: Request, res: Response) {
 }
 
 export async function updateProfile(
-  req: Request,
+  req: Request<{}, {}, UpdateUserBody>,
   res: Response,
   next: NextFunction
 ) {
   try {
+    const user = await userModel.findById(req.user.userId);
+
+    if (!user) {
+      throw new HttpException(404, "User not found");
+    }
+
+    const { firstName, lastName, password } = req.body;
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+
+    await auth.updateKeyPassword("email", user.email, password);
+
+    const updatedUser = await user.save();
+
+    res.json({
+      updatedUser,
+    });
   } catch (error) {
     next(error);
   }
-  const user = await userModel.findById(req.user.userId);
-
-  if (!user) {
-    throw new HttpException(404, "User not found");
-  }
-
-  user.firstName = req.body.firstName || user.firstName;
-  user.lastName = req.body.lastName || user.firstName;
-
-  if (req.body.password) {
-    await auth.updateKeyPassword("email", user.email, req.body.password);
-  }
-
-  const updatedUser = await user.save();
-
-  res.json({
-    firstName: updatedUser.firstName,
-    lastName: updatedUser.lastName,
-  });
 }
 
 export async function forgotPassword(

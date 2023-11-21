@@ -56,6 +56,23 @@ export const loginUserDto = object({
   }),
 });
 
+export const updateUserDto = object({
+  body: object({
+    firstName: string({
+      required_error: "Prenom est requis",
+    }),
+    lastName: string({
+      required_error: "Nom est requis",
+    }),
+    password: string({
+      required_error: "Mot de passe est requis",
+      invalid_type_error: "Mot de passe doit être une chaine de caractères",
+    }).min(6, "Mot de passe doit faire minimum 6 caractères"),
+  }),
+});
+
+export type UpdateUserBody = TypeOf<typeof updateUserDto>["body"];
+
 export type LoginUserBody = TypeOf<typeof loginUserDto>["body"];
 
 export type RegisterUserBody = TypeOf<typeof registerUserDto>["body"];
