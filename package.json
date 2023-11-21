@@ -19,7 +19,7 @@
     "helmet": "^7.0.0",
     "install": "^0.13.0",
     "lodash": "^4.17.21",
-    "lucia": "^2.7.2",
+    "lucia": "^2.7.4",
     "mongoose": "^7.5.3",
     "nanoid": "^3.3.4",
     "nodemailer": "^6.9.5",
