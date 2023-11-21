@@ -7,11 +7,11 @@ import {
   ResetPasswordBody,
   ResetPasswordParams,
   VerifyUserParams,
-} from "../validationSchema/user.schema";
-import { log, auth } from "../config";
-import { sendEmail } from "../utils";
-import { userModel } from "../model";
-import passwordResetTokenModel from "../model/passwordResetToken.model";
+} from "@validationSchema/user.schema";
+import { log, auth } from "@config/index";
+import { sendEmail } from "@utils/index";
+import { userModel } from "@model/index";
+import passwordResetTokenModel from "@model/passwordResetToken.model";
 import { generateRandomString, isWithinExpiration } from "lucia/utils";
 import { LuciaError } from "lucia";
 

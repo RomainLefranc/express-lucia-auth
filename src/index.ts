@@ -1,9 +1,8 @@
 import express from "express";
-import { log, connectToDb } from "./config";
-import router from "./routes";
+import { log, connectToDb } from "@config/index";
+import router from "@routes/index";
 import helmet from "helmet";
-import rateLimiter from "./middleware/rateLimiter";
-import { errorHandler, notFound } from "./middleware/error";
+import { rateLimiter, errorHandler, notFound } from "@middleware/index";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 

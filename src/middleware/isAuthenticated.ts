@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../config";
+import { auth } from "@config/index";
 
 const isAuthenticated = async (
   req: Request,
