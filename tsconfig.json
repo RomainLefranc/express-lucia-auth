@@ -104,7 +104,8 @@
       "@model/*": ["model/*"],
       "@routes/*": ["routes/*"],
       "@utils/*": ["utils/*"],
-      "@validationSchema/*": ["validationSchema/*"]
+      "@dtos/*": ["dtos/*"],
+      "@exceptions/*": ["exceptions/*"]
     }
   }
 }
