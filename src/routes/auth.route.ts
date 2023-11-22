@@ -1,6 +1,6 @@
 import express from "express";
-import emailProviderRoute from "./auth/email.route";
-import githubProviderRoute from "./auth/github.route";
+import emailProviderRoute from "@routes/auth/email.route";
+import githubProviderRoute from "@routes/auth/github.route";
 
 const router = express.Router();
 

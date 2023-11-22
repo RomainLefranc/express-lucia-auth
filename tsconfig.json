@@ -105,7 +105,8 @@
       "@routes/*": ["routes/*"],
       "@utils/*": ["utils/*"],
       "@dtos/*": ["dtos/*"],
-      "@exceptions/*": ["exceptions/*"]
+      "@exceptions/*": ["exceptions/*"],
+      "@controller/*": ["controller/*"]
     }
   }
 }

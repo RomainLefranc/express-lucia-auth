@@ -1,46 +1,46 @@
 import express from "express";
-import * as userController from "../../controller/user.controller";
-import { ValidateResourceMiddleware } from "../../middleware/validateResource.middleware";
+import * as authController from "@controller/auth.controller";
+import { ValidateResourceMiddleware } from "@middleware/validateResource.middleware";
 import {
   registerUserDto,
   forgotPasswordDto,
   resetPasswordDto,
   verifyUserDto,
   loginUserDto,
-} from "../../dtos/user.dto";
+} from "@dtos/user.dto";
 
 const router = express.Router();
 
 router.post(
   "/register",
   ValidateResourceMiddleware(registerUserDto),
-  userController.register
+  authController.register
 );
 
 router.post(
   "/login",
   ValidateResourceMiddleware(loginUserDto),
-  userController.login
+  authController.login
 );
 
-router.post("/logout", userController.logout);
+router.post("/logout", authController.logout);
 
 router.get(
   "/verify/:verificationToken",
   ValidateResourceMiddleware(verifyUserDto),
-  userController.verify
+  authController.verify
 );
 
 router.post(
   "/forgot-password",
   ValidateResourceMiddleware(forgotPasswordDto),
-  userController.forgotPassword
+  authController.forgotPassword
 );
 
 router.post(
   "/reset-password/:passwordResetToken",
   ValidateResourceMiddleware(resetPasswordDto),
-  userController.resetPassword
+  authController.resetPassword
 );
 
 export default router;
