@@ -1,15 +1,20 @@
 import { lucia } from "lucia";
 import { express } from "lucia/middleware";
 import { mongoose } from "@lucia-auth/adapter-mongoose";
-import { userModel, sessionModel, keyModel } from "../model";
+import { userModel, keyModel } from "../model";
 import { github } from "@lucia-auth/oauth/providers";
+import { redis } from "@lucia-auth/adapter-session-redis";
+import { redisClient } from "./redis.config";
 
 export const auth = lucia({
-  adapter: mongoose({
-    User: userModel,
-    Key: keyModel,
-    Session: sessionModel,
-  }),
+  adapter: {
+    user: mongoose({
+      User: userModel,
+      Key: keyModel,
+      Session: null,
+    }),
+    session: redis(redisClient),
+  },
   env: process.env.NODE_ENV === "development" ? "DEV" : "PROD",
   middleware: express(),
   getUserAttributes: (data) => {

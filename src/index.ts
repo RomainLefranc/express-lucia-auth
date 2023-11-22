@@ -1,5 +1,4 @@
 import express from "express";
-import { logger, connectToDb } from "@config/index.config";
 import router from "@routes/index";
 import helmet from "helmet";
 import {
@@ -9,7 +8,14 @@ import {
 } from "@middleware/index.middleware";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-connectToDb();
+import {
+  logger,
+  connectToDatabase,
+  connectToRedis,
+} from "@config/index.config";
+
+connectToDatabase();
+connectToRedis();
 
 const app = express();
 

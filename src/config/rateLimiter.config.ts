@@ -1,10 +1,16 @@
-import mongoose from "mongoose";
-import { RateLimiterMongo } from "rate-limiter-flexible";
+import {
+  IRateLimiterRedisOptions,
+  RateLimiterRedis,
+} from "rate-limiter-flexible";
+import { redisClient } from "./redis.config";
 
-const config = {
-  storeClient: mongoose.connection,
-  points: 10,
-  duration: 1,
+const config: IRateLimiterRedisOptions = {
+  storeClient: redisClient,
+  points: 5,
+  duration: 5,
+  blockDuration: 10,
+  useRedisPackage: true,
+  keyPrefix: "rlflx",
 };
 
-export const rateLimiter = new RateLimiterMongo(config);
+export const rateLimiter = new RateLimiterRedis(config);
