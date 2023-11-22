@@ -23,6 +23,4 @@ const sessionSchema = new Schema<SessionDoc>(
   { _id: false }
 );
 
-const sessionModel = model("Session", sessionSchema);
-
-export default sessionModel;
+export const sessionModel = model("Session", sessionSchema);

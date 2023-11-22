@@ -24,9 +24,7 @@ const passwordResetTokenSchema = new Schema<IPasswordResetToken>(
   { _id: true }
 );
 
-const passwordResetTokenModel = model(
+export const passwordResetTokenModel = model(
   "passwordResetToken",
   passwordResetTokenSchema
 );
-
-export default passwordResetTokenModel;

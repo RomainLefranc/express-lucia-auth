@@ -16,6 +16,4 @@ const keySchema = new Schema<KeyDoc>(
   { _id: false }
 );
 
-const keyModel = model("Key", keySchema);
-
-export default keyModel;
+export const keyModel = model("Key", keySchema);
