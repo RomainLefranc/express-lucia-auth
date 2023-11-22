@@ -3,10 +3,10 @@ import { Schema, model } from "mongoose";
 
 interface IUser extends UserDoc {
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   emailIsVerified: boolean;
-  verificationToken: String;
+  verificationToken: string | null;
 }
 
 const userSchema = new Schema<IUser>(

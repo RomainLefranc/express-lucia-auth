@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@lucia-auth/adapter-mongoose": "^3.0.0",
+    "@lucia-auth/oauth": "^3.5.0",
     "dayjs": "^1.11.10",
     "express": "^4.18.2",
     "helmet": "^7.0.0",

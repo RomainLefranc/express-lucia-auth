@@ -13,6 +13,8 @@ declare global {
       SMTP_HOST: string;
       SMTP_PORT: number;
       SMTP_SECURE: boolean;
+      GITHUB_CLIENT_ID: string;
+      GITHUB_CLIENT_SECRET: string;
     }
   }
   /// <reference types="lucia" />
@@ -20,10 +22,10 @@ declare global {
     type Auth = import("./src/config/lucia.config").Auth;
     type DatabaseUserAttributes = {
       email: string;
-      firstName: string;
-      lastName: string;
+      firstName: string | null;
+      lastName: string | null;
       emailIsVerified: boolean;
-      verificationToken: String;
+      verificationToken: string | null;
     };
     type DatabaseSessionAttributes = {};
   }

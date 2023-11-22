@@ -9,11 +9,14 @@ import {
   UpdateUserBody,
   VerifyUserParams,
 } from "dtos/user.dto";
-import { auth } from "@config/index";
+import { auth, githubAuth } from "@config/index";
 import { sendEmail } from "@utils/index";
-import { userModel } from "@model/index";
-import passwordResetTokenModel from "@model/passwordResetToken.model";
-import { generateRandomString, isWithinExpiration } from "lucia/utils";
+import { userModel, passwordResetTokenModel } from "@model/index";
+import {
+  generateRandomString,
+  isWithinExpiration,
+  parseCookie,
+} from "lucia/utils";
 import { HttpException } from "exceptions/HttpException";
 
 export async function register(
@@ -74,7 +77,7 @@ export async function verify(
     }
 
     user.emailIsVerified = true;
-
+    user.verificationToken = null;
     await user.save();
 
     return res.status(200).json({
@@ -270,6 +273,76 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 
     authRequest.setSession(null);
     return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function githubLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const [url, state] = await githubAuth.getAuthorizationUrl();
+
+    res.cookie("github_oauth_state", state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+    return res.status(200);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function githubCallback(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const cookies = parseCookie(req.headers.cookie ?? "");
+    const storedState = cookies.github_oauth_state;
+    const state = req.query.state;
+    const code = req.query.code;
+
+    if (
+      !storedState ||
+      !state ||
+      storedState !== state ||
+      typeof code !== "string"
+    ) {
+      return res.sendStatus(400);
+    }
+
+    const { getExistingUser, githubUser, createUser } =
+      await githubAuth.validateCallback(code);
+
+    const getUser = async () => {
+      const existingUser = await getExistingUser();
+      if (existingUser) return existingUser;
+      const user = await createUser({
+        attributes: {
+          email: githubUser.email!,
+          emailIsVerified: true,
+          firstName: null,
+          lastName: null,
+          verificationToken: null,
+        },
+      });
+      return user;
+    };
+
+    const user = await getUser();
+    const session = await auth.createSession({
+      userId: user.userId,
+      attributes: {},
+    });
+    const authRequest = auth.handleRequest(req, res);
+    authRequest.setSession(session);
   } catch (error) {
     next(error);
   }

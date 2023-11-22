@@ -6,6 +6,7 @@ import {
   sessionModel as Session,
   keyModel as Key,
 } from "../model";
+import { github } from "@lucia-auth/oauth/providers";
 
 export const auth = lucia({
   adapter: mongoose({
@@ -24,6 +25,11 @@ export const auth = lucia({
       verificationToken: data.verificationToken,
     };
   },
+});
+
+export const githubAuth = github(auth, {
+  clientId: process.env.GITHUB_CLIENT_ID,
+  clientSecret: process.env.GITHUB_CLIENT_SECRET,
 });
 
 export type Auth = typeof auth;
