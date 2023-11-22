@@ -1,13 +1,13 @@
 import nodemailer, { SendMailOptions } from "nodemailer";
-import { transporter, log } from "../config";
+import { mailer, logger } from "@config/index.config";
 
 export async function sendEmail(payload: SendMailOptions) {
-  transporter.sendMail(payload, (err, info) => {
+  mailer.sendMail(payload, (err, info) => {
     if (err) {
-      log.error(err, "Error sending email");
+      logger.error(err, "Error sending email");
       return;
     }
 
-    log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
   });
 }

@@ -1,14 +1,12 @@
 import { NextFunction, Response, Request } from "express";
-import { rateLimiterConfig } from "../config/rateLimiter.config";
+import { rateLimiter } from "@config/rateLimiter.config";
 
 export const RateLimitingMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const ratelimiter = rateLimiterConfig();
-
-  ratelimiter
+  rateLimiter
     .consume(req.ip)
     .then(() => {
       next();

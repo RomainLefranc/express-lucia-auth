@@ -9,8 +9,8 @@ export const ErrorMiddleware = (
   next: NextFunction
 ) => {
   try {
-    const status: number = error.status || 500;
-    let message: string = error.message || "Something went wrong";
+    const status = error.status || 500;
+    let message = error.message || "Something went wrong";
 
     if (
       error instanceof LuciaError &&

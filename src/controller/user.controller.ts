@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { UpdateUserBody } from "dtos/user.dto";
-import { auth } from "@config/index";
+import { auth } from "@config/index.config";
 import { userModel } from "@model/index";
 import { HttpException } from "exceptions/HttpException";
 

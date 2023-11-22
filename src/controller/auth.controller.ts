@@ -6,10 +6,9 @@ import {
   RegisterUserBody,
   ResetPasswordBody,
   ResetPasswordParams,
-  UpdateUserBody,
   VerifyUserParams,
 } from "dtos/user.dto";
-import { auth, githubAuth } from "@config/index";
+import { auth, githubAuth } from "@config/index.config";
 import { sendEmail } from "@utils/index";
 import { userModel, passwordResetTokenModel } from "@model/index";
 import {

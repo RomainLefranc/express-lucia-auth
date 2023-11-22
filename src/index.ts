@@ -1,5 +1,5 @@
 import express from "express";
-import { log, connectToDb } from "@config/index";
+import { logger, connectToDb } from "@config/index.config";
 import router from "@routes/index";
 import helmet from "helmet";
 import {
@@ -46,5 +46,5 @@ app.use(ErrorMiddleware);
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => {
-  log.info(`App started at http://localhost:${port}`);
+  logger.info(`App started at http://localhost:${port}`);
 });

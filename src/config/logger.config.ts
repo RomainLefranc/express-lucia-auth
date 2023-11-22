@@ -1,7 +1,7 @@
-import logger from "pino";
+import * as pino from "pino";
 import dayjs from "dayjs";
 
-export const log = logger({
+export const logger = pino.default({
   transport: {
     target: "pino-pretty",
   },

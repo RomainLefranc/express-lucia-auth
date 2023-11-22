@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "@config/index";
+import { auth } from "@config/index.config";
 
 export const AuthenticationMiddleware = async (
   req: Request,
