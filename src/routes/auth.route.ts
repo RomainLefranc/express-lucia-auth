@@ -1,11 +1,11 @@
 import express from "express";
-import email from "./auth/email.route";
-import google from "./auth/google.route";
+import emailProviderRoute from "./auth/email.route";
+import githubProviderRoute from "./auth/github.route";
 
 const router = express.Router();
 
-router.use("/email", email);
+router.use("/email", emailProviderRoute);
 
-router.use("/google", google);
+router.use("/github", githubProviderRoute);
 
 export default router;
