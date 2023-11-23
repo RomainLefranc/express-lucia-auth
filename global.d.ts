@@ -15,6 +15,8 @@ declare global {
       SMTP_SECURE: boolean;
       GITHUB_CLIENT_ID: string;
       GITHUB_CLIENT_SECRET: string;
+      REDIS_URI: string;
+      REDIS_PASSWORD: string;
     }
   }
   /// <reference types="lucia" />
