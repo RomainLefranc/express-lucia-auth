@@ -2,7 +2,7 @@ import {
   IRateLimiterRedisOptions,
   RateLimiterRedis,
 } from "rate-limiter-flexible";
-import { redisClient } from "./redis.config";
+import { redisClient } from "./redis.config.js";
 
 const config: IRateLimiterRedisOptions = {
   storeClient: redisClient,

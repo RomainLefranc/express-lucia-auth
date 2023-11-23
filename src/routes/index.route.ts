@@ -1,8 +1,8 @@
 import express from "express";
-import userRoute from "@routes/user.route";
-import authRoute from "@routes/auth.route";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import userRoute from "@routes/user.route.js";
+import authRoute from "@routes/auth.route.js";
 
 const router = express.Router();
 

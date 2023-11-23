@@ -1,8 +1,8 @@
-import { connectToDatabase } from "./db.config";
-import { logger } from "./logger.config";
-import { type Auth, auth, githubAuth } from "./lucia.config";
-import { mailer } from "./mailer.config";
-import { redisClient, connectToRedis } from "./redis.config";
+import { connectToDatabase } from "./db.config.js";
+import { logger } from "./logger.config.js";
+import { type Auth, auth, githubAuth } from "./lucia.config.js";
+import { mailer } from "./mailer.config.js";
+import { redisClient, connectToRedis } from "./redis.config.js";
 
 export {
   connectToDatabase,

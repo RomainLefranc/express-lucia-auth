@@ -1,13 +1,13 @@
 import express from "express";
-import * as authController from "@controller/auth.controller";
-import { ValidateResourceMiddleware } from "@middleware/validateResource.middleware";
+import * as authController from "@controller/auth.controller.js";
+import { ValidateResourceMiddleware } from "@middleware/validateResource.middleware.js";
 import {
   registerUserDto,
   forgotPasswordDto,
   resetPasswordDto,
   verifyUserDto,
   loginUserDto,
-} from "@dtos/user.dto";
+} from "@dtos/user.dto.js";
 
 const router = express.Router();
 

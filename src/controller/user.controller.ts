@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { UpdateUserBody } from "dtos/user.dto";
-import { auth } from "@config/index.config";
-import { userModel } from "@model/index";
-import { HttpException } from "exceptions/HttpException";
+import { UpdateUserBody } from "@dtos/user.dto.js";
+import { auth } from "@config/index.config.js";
+import { userModel } from "@model/index.model.js";
+import { HttpException } from "@exceptions/HttpException.js";
 
 export async function getProfile(
   req: Request,

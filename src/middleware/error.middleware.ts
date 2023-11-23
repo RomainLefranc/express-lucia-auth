@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
-import { HttpException } from "@exceptions/HttpException";
 import { LuciaError } from "lucia";
+import { HttpException } from "@exceptions/HttpException.js";
 
 export const ErrorMiddleware = (
   error: HttpException,

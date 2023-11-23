@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from "express";
-import { rateLimiter } from "@config/rateLimiter.config";
+import { rateLimiter } from "@config/rateLimiter.config.js";
 
 export const RateLimitingMiddleware = (
   req: Request,

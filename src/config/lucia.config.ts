@@ -1,10 +1,10 @@
 import { lucia } from "lucia";
 import { express } from "lucia/middleware";
 import { mongoose } from "@lucia-auth/adapter-mongoose";
-import { userModel, keyModel } from "../model";
 import { github } from "@lucia-auth/oauth/providers";
 import { redis } from "@lucia-auth/adapter-session-redis";
-import { redisClient } from "./redis.config";
+import { redisClient } from "./redis.config.js";
+import { userModel, keyModel } from "../model/index.model.js";
 
 export const auth = lucia({
   adapter: {

@@ -7,16 +7,16 @@ import {
   ResetPasswordBody,
   ResetPasswordParams,
   VerifyUserParams,
-} from "dtos/user.dto";
-import { auth, githubAuth } from "@config/index.config";
-import { sendEmail } from "@utils/index";
-import { userModel, passwordResetTokenModel } from "@model/index";
+} from "@dtos/user.dto.js";
+import { auth, githubAuth } from "@config/index.config.js";
+import { sendEmail } from "@utils/index.utils.js";
+import { userModel, passwordResetTokenModel } from "@model/index.model.js";
 import {
   generateRandomString,
   isWithinExpiration,
   parseCookie,
 } from "lucia/utils";
-import { HttpException } from "exceptions/HttpException";
+import { HttpException } from "@exceptions/HttpException.js";
 
 export async function register(
   req: Request<{}, {}, RegisterUserBody>,

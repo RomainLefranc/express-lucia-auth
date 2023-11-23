@@ -1,8 +1,8 @@
-import { ErrorMiddleware } from "./error.middleware";
-import { AuthenticationMiddleware } from "./authentication.middleware";
-import { RateLimitingMiddleware } from "./rateLimiting.middleware";
-import { ValidateResourceMiddleware } from "./validateResource.middleware";
-import { NotFoundMiddleware } from "./notFound.middleware";
+import { ErrorMiddleware } from "./error.middleware.js";
+import { AuthenticationMiddleware } from "./authentication.middleware.js";
+import { RateLimitingMiddleware } from "./rateLimiting.middleware.js";
+import { ValidateResourceMiddleware } from "./validateResource.middleware.js";
+import { NotFoundMiddleware } from "./notFound.middleware.js";
 
 export {
   ErrorMiddleware,

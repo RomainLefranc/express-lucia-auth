@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && tsc-alias",
     "dev": "tsx --env-file .env --watch src",
-    "start": "tsx --env-file .env src"
+    "start": "node --env-file .env dist/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +36,7 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
+    "tsc-alias": "^1.8.8",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.6",
     "@types/cors": "^2.8.17",

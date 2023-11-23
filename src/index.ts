@@ -1,18 +1,18 @@
 import express from "express";
-import router from "@routes/index";
+import router from "@routes/index.route.js";
 import helmet from "helmet";
 import {
   RateLimitingMiddleware,
   ErrorMiddleware,
   NotFoundMiddleware,
-} from "@middleware/index.middleware";
+} from "@middleware/index.middleware.js";
 import {
   logger,
   connectToDatabase,
   connectToRedis,
-} from "@config/index.config";
+} from "@config/index.config.js";
 import morgan from "morgan";
-import { stream } from "@config/logger.config";
+import { stream } from "@config/logger.config.js";
 import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";

@@ -1,5 +1,5 @@
 import { RedisClientOptions, createClient } from "redis";
-import { logger } from "./logger.config";
+import { logger } from "./logger.config.js";
 
 const config: RedisClientOptions = {
   password: process.env.REDIS_PASSWORD,
