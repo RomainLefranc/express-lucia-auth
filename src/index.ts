@@ -18,6 +18,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 connectToDatabase();
+
 connectToRedis();
 
 const app = express();
