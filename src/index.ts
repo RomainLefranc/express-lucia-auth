@@ -6,20 +6,31 @@ import {
   ErrorMiddleware,
   NotFoundMiddleware,
 } from "@middleware/index.middleware";
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 import {
   logger,
   connectToDatabase,
   connectToRedis,
 } from "@config/index.config";
+import morgan from "morgan";
+import { stream } from "@config/logger.config";
+import compression from "compression";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 connectToDatabase();
 connectToRedis();
 
 const app = express();
 
+app.use(morgan("dev", { stream }));
+
+app.use(compression());
+
+app.use(cors({ origin: "*", credentials: true }));
+
 app.use(helmet());
+
+app.use(cookieParser());
 
 app.use(express.json());
 
@@ -28,22 +39,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(RateLimitingMiddleware);
 
 app.use("/api", router);
-
-if (process.env.NODE_ENV === "development") {
-  const optionsSwaggerJsdocs = {
-    swaggerDefinition: {
-      openapi: "3.0.0",
-      info: {
-        title: "",
-        version: "1.0.0",
-      },
-    },
-    apis: ["./src/routes/*.ts"],
-  };
-
-  const swaggerSpecification = swaggerJsdoc(optionsSwaggerJsdocs);
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
-}
 
 app.use(NotFoundMiddleware);
 
