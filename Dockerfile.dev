@@ -1,19 +1,22 @@
-# NodeJS Version 20.9
-FROM node:20.9-buster-slim
+FROM node:20.9-alpine3.17
 
-# Copy Dir
-COPY . ./app
+RUN apk --no-cache add dumb-init
 
-# Work to Dir
-WORKDIR /app
+RUN mkdir -p /home/node/app && chown node:node /home/node/app 
 
-# Install Node Package
-RUN npm install
+WORKDIR /home/node/app
 
-# Set Env
+USER node
+
+RUN mkdir tmp
+
+COPY --chown=node:node . .
+
+RUN npm ci
+
 ENV NODE_ENV development
 
 EXPOSE 8080
 
 # Cmd script
-CMD ["npm", "run", "dev"]
+CMD [ "dumb-init", "npm", "run", "dev" ]

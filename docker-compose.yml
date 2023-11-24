@@ -40,7 +40,7 @@ services:
 
   redis:
     container_name: redis
-    image: redis
+    image: redis:alpine
     restart: "unless-stopped"
     networks:
       - backend
