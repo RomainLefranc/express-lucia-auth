@@ -23,4 +23,4 @@ COPY --chown=node:node --from=build /home/node/app/dist .
 EXPOSE 8080
 
 # Cmd script
-CMD [ "dumb-init", "npm", "run", "start" ]
+CMD [ "dumb-init", "node", "index.js" ]
