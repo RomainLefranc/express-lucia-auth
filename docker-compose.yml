@@ -1,21 +1,16 @@
 services:
-  # proxy:
-  #   container_name: proxy
-  #   image: nginx:alpine
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
-  #   restart: "unless-stopped"
-  #   networks:
-  #     - backend
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    restart: "unless-stopped"
 
   server:
     build:
-      context: ./
-      dockerfile: Dockerfile.dev
-    ports:
-      - "8080:8080"
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./:/app
       - node_modules:/app/node_modules
@@ -24,6 +19,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo
       - REDIS_URL=redis://redis
+      - NODE_ENV=production
     restart: "unless-stopped"
     depends_on:
       - redis
