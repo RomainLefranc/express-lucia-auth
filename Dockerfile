@@ -16,7 +16,6 @@ FROM dependencies AS build
 RUN npm run build
 
 FROM base AS production
-ENV NODE_ENV=production
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --production
 COPY --chown=node:node --from=build /home/node/app/dist .
