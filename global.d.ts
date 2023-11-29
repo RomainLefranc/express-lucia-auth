@@ -1,23 +1,9 @@
 import { ObjectId } from "mongoose";
 import { User } from "lucia";
+import { envSchema } from "@config/env.config";
 declare global {
   namespace NodeJS {
-    interface ProcessEnv {
-      PORT: number;
-      NODE_ENV: string;
-      MONGO_URI: string;
-      JWT_SECRET: string;
-      LOG_LEVEL: string;
-      SMTP_USER: string;
-      SMTP_PASS: string;
-      SMTP_HOST: string;
-      SMTP_PORT: number;
-      SMTP_SECURE: boolean;
-      GITHUB_CLIENT_ID: string;
-      GITHUB_CLIENT_SECRET: string;
-      REDIS_URI: string;
-      REDIS_PASSWORD: string;
-    }
+    interface ProcessEnv extends z.infer<typeof envSchema> {}
   }
   /// <reference types="lucia" />
   namespace Lucia {

@@ -5,6 +5,7 @@ import { github } from "@lucia-auth/oauth/providers";
 import { redis } from "@lucia-auth/adapter-session-redis";
 import { redisClient } from "./redis.config.js";
 import { userModel, keyModel } from "../model/index.model.js";
+import { env } from "./env.config.js";
 
 export const auth = lucia({
   adapter: {
@@ -15,7 +16,7 @@ export const auth = lucia({
     }),
     session: redis(redisClient),
   },
-  env: process.env.NODE_ENV === "development" ? "DEV" : "PROD",
+  env: env.NODE_ENV === "development" ? "DEV" : "PROD",
   middleware: express(),
   getUserAttributes: (data) => {
     return {
@@ -29,8 +30,8 @@ export const auth = lucia({
 });
 
 export const githubAuth = github(auth, {
-  clientId: process.env.GITHUB_CLIENT_ID,
-  clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  clientId: env.GITHUB_CLIENT_ID,
+  clientSecret: env.GITHUB_CLIENT_SECRET,
 });
 
 export type Auth = typeof auth;

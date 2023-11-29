@@ -16,6 +16,7 @@ import { stream } from "@config/logger.config.js";
 import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { env } from "@config/env.config.js";
 
 connectToDatabase();
 
@@ -45,7 +46,7 @@ app.use(NotFoundMiddleware);
 
 app.use(ErrorMiddleware);
 
-const port = process.env.PORT || 8080;
+const port = env.PORT;
 
 app.listen(port, () => {
   logger.info(`App started at http://localhost:${port}`);

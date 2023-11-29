@@ -1,11 +1,12 @@
 import * as pino from "pino";
 import dayjs from "dayjs";
+import { env } from "./env.config.js";
 
 export const logger = pino.default({
   transport: {
     target: "pino-pretty",
   },
-  level: process.env.LOG_LEVEL,
+  level: env.LOG_LEVEL,
   base: {
     pid: false,
   },

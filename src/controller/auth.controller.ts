@@ -17,6 +17,7 @@ import {
   parseCookie,
 } from "lucia/utils";
 import { HttpException } from "@exceptions/HttpException.js";
+import { env } from "@config/env.config.js";
 
 export async function register(
   req: Request<{}, {}, RegisterUserBody>,
@@ -252,7 +253,7 @@ export async function githubLogin(
 
     res.cookie("github_oauth_state", state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 1000, // 1 hour
     });

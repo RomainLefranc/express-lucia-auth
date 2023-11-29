@@ -3,6 +3,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import userRoute from "@routes/user.route.js";
 import authRoute from "@routes/auth.route.js";
+import { env } from "@config/env.config.js";
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.use("/auth/provider", authRoute);
 
 router.use("/profile", userRoute);
 
-if (process.env.NODE_ENV === "development") {
+if (env.NODE_ENV === "development") {
   const optionsSwaggerJsdocs = {
     swaggerDefinition: {
       openapi: "3.0.0",

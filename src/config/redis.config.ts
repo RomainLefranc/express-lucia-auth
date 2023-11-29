@@ -1,10 +1,10 @@
 import { RedisClientOptions, createClient } from "redis";
 import { logger } from "./logger.config.js";
+import { env } from "./env.config.js";
 
 const config: RedisClientOptions = {
-  password: process.env.REDIS_PASSWORD,
-  database: 1,
-  url: process.env.REDIS_URL,
+  password: env.REDIS_PASSWORD,
+  url: env.REDIS_URL,
 };
 
 export const redisClient = createClient(config);
