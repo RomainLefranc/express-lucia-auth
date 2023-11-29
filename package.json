@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && tsc-alias",
     "dev": "tsx --env-file .env --watch src",
-    "start": "npm run build && node --env-file .env dist/index.js"
+    "start": "npm run build && node --env-file .env dist/index.js",
+    "genSecret": "tsx ./generateSecret.ts"
   },
   "author": "",
   "license": "ISC",
