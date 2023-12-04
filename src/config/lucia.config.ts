@@ -1,30 +1,37 @@
 import { lucia } from "lucia";
 import { express } from "lucia/middleware";
-import { mongoose } from "@lucia-auth/adapter-mongoose";
 import { github } from "@lucia-auth/oauth/providers";
 import { redis } from "@lucia-auth/adapter-session-redis";
 import { redisClient } from "./redis.config.js";
-import { userModel, keyModel } from "../model/index.model.js";
 import { env } from "./env.config.js";
+import { prisma } from "@lucia-auth/adapter-prisma";
+import { prismaClient } from "./db.config.js";
 
 export const auth = lucia({
   adapter: {
-    user: mongoose({
-      User: userModel,
-      Key: keyModel,
-      Session: null,
+    user: prisma(prismaClient, {
+      key: "key",
+      session: null,
+      user: "user",
     }),
     session: redis(redisClient),
   },
   env: env.NODE_ENV === "development" ? "DEV" : "PROD",
   middleware: express(),
   getUserAttributes: (data) => {
+    const {
+      email,
+      first_name,
+      last_name,
+      email_is_verified,
+      verification_token,
+    } = data;
     return {
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      emailIsVerified: data.emailIsVerified,
-      verificationToken: data.verificationToken,
+      email,
+      first_name,
+      last_name,
+      email_is_verified,
+      verification_token,
     };
   },
 });

@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import { User } from "lucia";
 import { envSchema } from "@config/env.config";
 declare global {
@@ -10,10 +9,10 @@ declare global {
     type Auth = import("./src/config/lucia.config").Auth;
     type DatabaseUserAttributes = {
       email: string;
-      firstName: string | null;
-      lastName: string | null;
-      emailIsVerified: boolean;
-      verificationToken: string | null;
+      first_name: string | null;
+      last_name: string | null;
+      email_is_verified: boolean;
+      verification_token: string | null;
     };
     type DatabaseSessionAttributes = {};
   }

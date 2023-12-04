@@ -8,8 +8,8 @@ import {
 } from "@middleware/index.middleware.js";
 import {
   logger,
-  connectToDatabase,
   connectToRedis,
+  connectToDatabase,
 } from "@config/index.config.js";
 import morgan from "morgan";
 import { stream } from "@config/logger.config.js";

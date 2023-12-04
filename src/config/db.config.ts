@@ -1,13 +1,11 @@
-import { connect, set } from "mongoose";
+import { PrismaClient } from "@prisma/client";
 import { logger } from "./logger.config.js";
-import { env } from "./env.config.js";
+
+export const prismaClient = new PrismaClient();
 
 export async function connectToDatabase() {
   try {
-    if (env.NODE_ENV !== "production") {
-      set("debug", true);
-    }
-    await connect(env.MONGO_URI);
+    await prismaClient.$connect();
     logger.info("Connected to Database");
   } catch (error) {
     logger.info(error);

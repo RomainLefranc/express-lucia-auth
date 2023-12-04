@@ -17,19 +17,25 @@ services:
     env_file:
       - .env
     environment:
-      - MONGO_URI=mongodb://mongo
+      - DATABASE_URL=postgresql://romain:romain@postgres:5432/express-auth
       - REDIS_URL=redis://redis
       - NODE_ENV=production
     restart: "unless-stopped"
     depends_on:
       - redis
-      - mongo
+      - postgres
 
-  mongo:
-    image: mongo
+  postgres:
+    image: postgres:latest
+    container_name: my_postgres
+    environment:
+      POSTGRES_USER: romain
+      POSTGRES_PASSWORD: romain
+      POSTGRES_DB: express-auth
+    ports:
+      - "5432:5432"
     volumes:
-      - data:/data/db
-      - data:/data/configdb
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:alpine
@@ -39,5 +45,5 @@ services:
 
 volumes:
   cache:
-  data:
+  postgres_data:
   node_modules:
