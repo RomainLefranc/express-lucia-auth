@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import { LuciaError } from "lucia";
 import { HttpException } from "@exceptions/HttpException.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export const ErrorMiddleware = (
   error: HttpException,
@@ -9,12 +10,14 @@ export const ErrorMiddleware = (
   next: NextFunction
 ) => {
   try {
+    console.log(error);
+
     const status = error.status || 500;
     let message = error.message || "Something went wrong";
 
     if (
-      error instanceof LuciaError &&
-      error.message == "AUTH_DUPLICATE_KEY_ID"
+      error instanceof PrismaClientKnownRequestError &&
+      error.code == "P2002"
     ) {
       message = "Account already exist";
     }

@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { nanoid } from "nanoid";
 import {
   ForgotPasswordBody,
   LoginUserBody,
@@ -28,34 +27,37 @@ export async function register(
     const body = req.body;
 
     const { email, firstName, lastName, password } = body;
-    const user = await auth.createUser({
-      key: {
-        providerId: "email",
-        providerUserId: email.toLowerCase(),
-        password,
-      },
-      attributes: {
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        email_is_verified: false,
-      },
-    });
 
-    const token = await prismaClient.token.create({
-      data: {
-        expires: null,
-        type: "EMAIL_VERIFICATION",
-        id: nanoid(),
-        user_id: user.userId,
-      },
-    });
+    await prismaClient.$transaction(async (prisma) => {
+      const user = await auth.createUser({
+        key: {
+          providerId: "email",
+          providerUserId: email.toLowerCase(),
+          password,
+        },
+        attributes: {
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          email_is_verified: false,
+        },
+      });
 
-    await sendEmail({
-      to: user.email,
-      from: "test@example.com",
-      subject: "Verify your email",
-      text: `verification token: ${token.id}`,
+      const token = await prisma.token.create({
+        data: {
+          expires: null,
+          type: "EMAIL_VERIFICATION",
+          id: generateRandomString(63),
+          user_id: user.userId,
+        },
+      });
+
+      // await sendEmail({
+      //   to: user.email,
+      //   from: "test@example.com",
+      //   subject: "Verify your email",
+      //   text: `verification token: ${token.id}`,
+      // });
     });
 
     return res.status(201).json({
@@ -82,11 +84,18 @@ export async function verify(
       throw new HttpException(400, "Verification token invalid");
     }
 
-    await prismaClient.user.update({
-      where: { id: token.user_id },
-      data: {
-        email_is_verified: true,
-      },
+    await prismaClient.$transaction(async (prsima) => {
+      await Promise.all([
+        prismaClient.user.update({
+          where: { id: token.user_id },
+          data: {
+            email_is_verified: true,
+          },
+        }),
+        prismaClient.token.delete({
+          where: { id: token.id },
+        }),
+      ]);
     });
 
     return res.status(200).json({
@@ -105,9 +114,8 @@ export async function login(
   try {
     const message = "Invalid email or password";
     const { email, password } = req.body;
-    let key;
 
-    key = await auth.useKey("email", email.toLowerCase(), password);
+    const key = await auth.useKey("email", email.toLowerCase(), password);
 
     const user = await prismaClient.user.findUnique({
       where: { id: key.userId },
@@ -186,21 +194,26 @@ export async function forgotPassword(
     }
 
     const passwordResetToken = generateRandomString(63);
+    const expires = new Date(new Date().getTime() + EXPIRES_IN);
 
-    await prismaClient.token.create({
-      data: {
-        user_id: user.id,
-        expires: new Date((new Date().getTime() + EXPIRES_IN) * 1000),
-        id: passwordResetToken,
-        type: "PASSWORD_RESET",
-      },
-    });
+    await prismaClient.$transaction(async (prisma) => {
+      await Promise.all([
+        prisma.token.create({
+          data: {
+            user_id: user.id,
+            expires,
+            id: passwordResetToken,
+            type: "PASSWORD_RESET",
+          },
+        }),
 
-    await sendEmail({
-      to: user.email,
-      from: "test@example.com",
-      subject: "Réinitialisez votre mot de passe",
-      text: `Code de réinitialisation de mot de passe: ${passwordResetToken}`,
+        sendEmail({
+          to: user.email,
+          from: "test@example.com",
+          subject: "Réinitialisez votre mot de passe",
+          text: `Code de réinitialisation de mot de passe: ${passwordResetToken}`,
+        }),
+      ]);
     });
 
     res.status(200);
@@ -229,12 +242,6 @@ export async function resetPassword(
       throw new HttpException(500, "Reset password token invalid");
     }
 
-    await prismaClient.token.delete({
-      where: {
-        id: storedPasswordResetToken.id,
-      },
-    });
-
     if (!isWithinExpiration(storedPasswordResetToken.expires!.getTime())) {
       throw new HttpException(500, "Reset password token expired");
     }
@@ -249,7 +256,16 @@ export async function resetPassword(
       throw new HttpException(500, "Something went wrong");
     }
 
-    await auth.updateKeyPassword("email", user.email, password);
+    await prismaClient.$transaction(async (prisma) => {
+      await Promise.all([
+        auth.updateKeyPassword("email", user.email, password),
+        prisma.token.delete({
+          where: {
+            id: storedPasswordResetToken.id,
+          },
+        }),
+      ]);
+    });
 
     res.status(200);
     return res.json({ message: "Password updated" });
