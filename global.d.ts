@@ -12,7 +12,6 @@ declare global {
       first_name: string | null;
       last_name: string | null;
       email_is_verified: boolean;
-      verification_token: string | null;
     };
     type DatabaseSessionAttributes = {};
   }

@@ -19,19 +19,12 @@ export const auth = lucia({
   env: env.NODE_ENV === "development" ? "DEV" : "PROD",
   middleware: express(),
   getUserAttributes: (data) => {
-    const {
-      email,
-      first_name,
-      last_name,
-      email_is_verified,
-      verification_token,
-    } = data;
+    const { email, first_name, last_name, email_is_verified } = data;
     return {
       email,
       first_name,
       last_name,
       email_is_verified,
-      verification_token,
     };
   },
 });

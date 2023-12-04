@@ -17,7 +17,6 @@ model User {
   first_name          String
   last_name           String
   email_is_verified   Boolean
-  verification_token  String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   key                 Key[]
@@ -36,11 +35,10 @@ model Key {
 
 model Token {
   id              String  @id @default(uuid()) @unique
-  hashed_password String?
   user_id         String
   user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
   type            TokenType
-  expires         DateTime
+  expires         DateTime?
   createdAt       DateTime @default(now())
   @@index([user_id])
 }

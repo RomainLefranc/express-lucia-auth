@@ -38,8 +38,16 @@ export async function register(
         email,
         first_name: firstName,
         last_name: lastName,
-        verification_token: nanoid(),
         email_is_verified: false,
+      },
+    });
+
+    const token = await prismaClient.token.create({
+      data: {
+        expires: null,
+        type: "EMAIL_VERIFICATION",
+        id: nanoid(),
+        user_id: user.userId,
       },
     });
 
@@ -47,7 +55,7 @@ export async function register(
       to: user.email,
       from: "test@example.com",
       subject: "Verify your email",
-      text: `verification token: ${user.verification_token}`,
+      text: `verification token: ${token.id}`,
     });
 
     return res.status(201).json({
@@ -66,23 +74,18 @@ export async function verify(
   try {
     const { verificationToken } = req.params;
 
-    const user = await prismaClient.user.findFirst({
-      where: { verification_token: verificationToken },
+    const token = await prismaClient.token.findUnique({
+      where: { id: verificationToken },
     });
 
-    if (!user) {
+    if (!token) {
       throw new HttpException(400, "Verification token invalid");
     }
 
-    if (user.email_is_verified) {
-      throw new HttpException(400, "User already verified");
-    }
-
     await prismaClient.user.update({
-      where: { id: user.id },
+      where: { id: token.user_id },
       data: {
         email_is_verified: true,
-        verification_token: null,
       },
     });
 
@@ -175,7 +178,7 @@ export async function forgotPassword(
 
     if (storedPasswordResetTokens.length > 0) {
       const reusableStoredToken = storedPasswordResetTokens.find((token) =>
-        isWithinExpiration(token.expires.getTime() - EXPIRES_IN / 2)
+        isWithinExpiration(token.expires!.getTime() - EXPIRES_IN / 2)
       );
       if (reusableStoredToken) {
         throw new HttpException(401, "Un email a déjà été envoyé");
@@ -232,7 +235,7 @@ export async function resetPassword(
       },
     });
 
-    if (!isWithinExpiration(storedPasswordResetToken.expires.getTime())) {
+    if (!isWithinExpiration(storedPasswordResetToken.expires!.getTime())) {
       throw new HttpException(500, "Reset password token expired");
     }
 
@@ -323,7 +326,6 @@ export async function githubCallback(
           email_is_verified: true,
           first_name: null,
           last_name: null,
-          verification_token: null,
         },
       });
       return user;
